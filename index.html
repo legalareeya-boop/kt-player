@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex, nofollow">
+<title>player</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  p { color: #aaa; font: 15px -apple-system, sans-serif; padding: 16px; }
+</style>
+</head>
+<body>
+<script>
+// Thin wrapper so YouTube/Vimeo embeds get a real https referrer when the parent page
+// runs inside an iOS app WebView (which sends none -> YouTube "Error 153").
+// Usage: ?u=<encoded https://www.youtube.com/embed/ID?... or https://player.vimeo.com/video/ID?...>
+(function () {
+  var raw = new URLSearchParams(location.search).get('u') || '';
+  var u;
+  try { u = new URL(raw); } catch (e) { u = null; }
+  var ok = u && u.protocol === 'https:' && /^(www\.)?(youtube\.com|youtube-nocookie\.com|player\.vimeo\.com)$/.test(u.hostname) &&
+    /^\/(embed|video)\/[\w-]+$/.test(u.pathname);
+  if (!ok) { document.body.innerHTML = '<p>ลิงก์วิดีโอไม่ถูกต้อง</p>'; return; }
+  if (/youtube/.test(u.hostname)) {
+    u.searchParams.set('playsinline', '1');
+    u.searchParams.set('origin', location.origin);
+    u.searchParams.set('rel', '0');
+  } else {
+    u.searchParams.set('playsinline', '1');
+  }
+  var f = document.createElement('iframe');
+  f.src = u.toString();
+  f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+  f.allowFullscreen = true;
+  f.referrerPolicy = 'strict-origin-when-cross-origin';
+  document.body.appendChild(f);
+})();
+</script>
+</body>
+</html>
